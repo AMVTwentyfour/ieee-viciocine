@@ -70,6 +70,7 @@ const actionMovies = await fetchMoviesByGenre("action", "movie");
 
 <script>
 	import { fetchMovieDetails } from "../lib/api.js";
+	import { addFavorite, removeFavorite, isFavorite } from "../lib/favorites.js";
 
 	// Placeholder images
 	const placeholderLarge =
@@ -104,12 +105,28 @@ const actionMovies = await fetchMoviesByGenre("action", "movie");
 			console.error("Modal no encontrado");
 			return;
 		}
+		modal.setAttribute("data-current-imdbid", imdbID);
 		modal.classList.remove("hidden");
 		document.body.classList.add("overflow-hidden");
 		setTimeout(() => {
 			modal.classList.remove("opacity-0", "scale-95");
 			modal.classList.add("opacity-100", "scale-100");
 		}, 10);
+
+		// Update favorite button in modal
+		const favoriteBtn = document.getElementById("favorite-modal-btn");
+		if (favoriteBtn) {
+			const icon = favoriteBtn.querySelector(".material-icons");
+			if (icon) {
+				if (isFavorite(imdbID)) {
+					icon.textContent = "favorite";
+					icon.classList.add("text-red-600");
+				} else {
+					icon.textContent = "favorite_border";
+					icon.classList.remove("text-red-600");
+				}
+			}
+		}
 	}
 
 	function closeModal() {
@@ -153,6 +170,28 @@ const actionMovies = await fetchMoviesByGenre("action", "movie");
 					closeModal();
 				}
 			});
+
+			// Handle favorite button in modal
+			const favoriteBtn = document.getElementById("favorite-modal-btn");
+			if (favoriteBtn) {
+				favoriteBtn.addEventListener("click", () => {
+					const imdbID = modal.getAttribute("data-current-imdbid");
+					if (imdbID) {
+						const icon = favoriteBtn.querySelector(".material-icons");
+						if (icon) {
+							if (isFavorite(imdbID)) {
+								removeFavorite(imdbID);
+								icon.textContent = "favorite_border";
+								icon.classList.remove("text-red-600");
+							} else {
+								addFavorite(imdbID);
+								icon.textContent = "favorite";
+								icon.classList.add("text-red-600");
+							}
+						}
+					}
+				});
+			}
 		} else {
 			console.error("Modal element not found");
 		}

@@ -3,13 +3,14 @@
 ---
 
 <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-md hidden z-50 flex items-center justify-center opacity-0 scale-95 transition-all duration-300 ease-out">
-  <div class="bg-linear-to-br from-white to-gray-50 rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-    <div class="relative p-6">
-      <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
-        <span class="material-icons text-2xl">close</span>
-      </button>
-      <div id="modal-content" class="pt-8">
-      </div>
+  <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto relative">
+    <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors z-10">
+      <span class="material-icons text-2xl">close</span>
+    </button>
+    <button id="favorite-modal-btn" class="absolute top-4 left-4 bg-white bg-opacity-80 rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-100 transition-all z-10">
+      <span class="material-icons text-red-500 text-xl leading-none">favorite_border</span>
+    </button>
+    <div id="modal-content" class="pt-12 px-6 pb-6">
     </div>
   </div>
 </div>
