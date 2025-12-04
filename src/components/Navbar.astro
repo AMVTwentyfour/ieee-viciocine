@@ -33,14 +33,18 @@ const currentPath = Astro.url.pathname;
   const searchBtn = document.getElementById('search-btn');
   const searchDropdown = document.getElementById('search-dropdown');
 
-  searchBtn.addEventListener('click', () => {
-    searchDropdown.classList.toggle('hidden');
-  });
+  if (searchBtn && searchDropdown) {
+    searchBtn.addEventListener('click', () => {
+      searchDropdown.classList.toggle('hidden');
+    });
 
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!searchBtn.contains(e.target) && !searchDropdown.contains(e.target)) {
-      searchDropdown.classList.add('hidden');
-    }
-  });
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e: MouseEvent) => {
+      if (!searchBtn.contains(e.target as Node) && !searchDropdown.contains(e.target as Node)) {
+        searchDropdown.classList.add('hidden');
+      }
+    });
+  } else {
+    console.error('Search button or dropdown element not found');
+  }
 </script>

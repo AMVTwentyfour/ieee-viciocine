@@ -1,165 +1,94 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import SkeletonCard from '../components/SkeletonCard.astro';
+import Layout from "../layouts/Layout.astro";
+import Section from "../components/Section.astro";
+import FilterSection from "../components/FilterSection.astro";
+import Modal from "../components/Modal.astro";
+import {
+	fetchLatestMovies,
+	fetchLatestSeries,
+	fetchMoviesByGenre,
+} from "../lib/api.js";
 
 // Fetch latest movies (2024)
-const latestMoviesResponse = await fetch('http://www.omdbapi.com/?s=movie&y=2025&apikey=f0331b30');
-const latestMovies = await latestMoviesResponse.json();
+const latestMovies = await fetchLatestMovies("2025");
 
 // Fetch latest series (2024)
-const latestSeriesResponse = await fetch('http://www.omdbapi.com/?s=series&y=2025&apikey=f0331b30');
-const latestSeries = await latestSeriesResponse.json();
+const latestSeries = await fetchLatestSeries("2025");
 
 // Fetch horror movies
-const horrorMoviesResponse = await fetch('http://www.omdbapi.com/?s=horror&type=movie&apikey=f0331b30');
-const horrorMovies = await horrorMoviesResponse.json();
+const horrorMovies = await fetchMoviesByGenre("horror", "movie");
 
 // Fetch action movies
-const actionMoviesResponse = await fetch('http://www.omdbapi.com/?s=action&type=movie&apikey=f0331b30');
-const actionMovies = await actionMoviesResponse.json();
-
-// Placeholder images
-const placeholderSmall = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
-const placeholderLarge = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+const actionMovies = await fetchMoviesByGenre("action", "movie");
 ---
 
 <Layout>
-  <!-- Banner -->
-  <section class="relative bg-linear-to-r from-blue-600 to-purple-700 text-white py-20 px-4 text-center overflow-hidden">
-    <div class="absolute inset-0 bg-black opacity-10"></div>
-    <div class="relative z-10 max-w-4xl mx-auto animate-fade-in-up">
-      <h1 class="text-5xl md:text-7xl font-extrabold mb-4 text-white drop-shadow-lg">Descubre tu próxima película favorita</h1>
-      <p class="text-lg md:text-xl mb-8">Explora, swipea y agrega a tu watchlist como en Tinder</p>
-      <a href="/swiper" class="inline-block bg-white text-blue-600 font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all duration-300 animate-pulse">
-        ¡Empieza a Swiper!
-      </a>
-    </div>
-  </section>
+	<!-- Banner -->
+	<section
+		class="relative bg-linear-to-r from-blue-600 to-purple-700 text-white py-20 px-4 text-center overflow-hidden"
+	>
+		<div class="absolute inset-0 bg-black opacity-10"></div>
+		<div class="relative z-10 max-w-4xl mx-auto animate-fade-in-up">
+			<h1
+				class="text-5xl md:text-7xl font-extrabold mb-4 text-white drop-shadow-lg"
+			>
+				Descubre tu próxima película favorita
+			</h1>
+			<p class="text-lg md:text-xl mb-8">
+				Explora, swipea y agrega a tu watchlist como en Tinder
+			</p>
+			<a
+				href="/swiper"
+				class="inline-block bg-white text-blue-600 font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all duration-300 animate-pulse"
+			>
+				¡Empieza a Swiper!
+			</a>
+		</div>
+	</section>
 
-  <!-- Filtros -->
-  <section class="py-6 px-4 bg-linear-to-r from-blue-50 to-purple-50">
-    <div class="max-w-6xl mx-auto">
-      <h3 class="text-lg font-semibold mb-4 text-center text-gray-700">Filtrar por Género</h3>
-      <div class="flex flex-wrap justify-center gap-3">
-        <span class="px-4 py-2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-md text-sm font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer">Acción</span>
-        <span class="px-4 py-2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-md text-sm font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer">Terror</span>
-        <span class="px-4 py-2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-md text-sm font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer">Comedia</span>
-        <span class="px-4 py-2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-md text-sm font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer">Drama</span>
-        <span class="px-4 py-2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-md text-sm font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer">Ciencia Ficción</span>
-        <span class="px-4 py-2 bg-white bg-opacity-80 backdrop-blur-sm rounded-full shadow-md text-sm font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer">Romance</span>
-      </div>
-    </div>
-  </section>
+	<FilterSection
+		genres={[
+			"Acción",
+			"Terror",
+			"Comedia",
+			"Drama",
+			"Ciencia Ficción",
+			"Romance",
+		]}
+	/>
 
-  <!-- Últimos Lanzamientos - Películas -->
-  <section class="py-12 px-4 animate-fade-in-up" style="animation-delay: 0.2s;">
-    <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-semibold">Peliculas</h3>
-        <button class="px-4 py-2 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors text-sm">Ver Todos</button>
-    </div>
-    <div class="md:grid md:grid-cols-4 lg:grid-cols-6 md:gap-4 flex overflow-x-auto space-x-4 md:space-x-0 pb-4">
-      {latestMovies.Search?.slice(0, 6).map((movie, index) => (
-        <div class="shrink-0 w-40 md:w-auto bg-linear-to-br from-white to-gray-50 bg-opacity-90 backdrop-blur-xl rounded-xl overflow-hidden hover:scale-105 transition-all duration-500 ease-out animate-fade-in-up cursor-pointer card h-64" data-imdbid={movie.imdbID}>
-          <img src={movie.Poster !== 'N/A' ? movie.Poster : placeholderSmall} alt={movie.Title} class="w-full h-48 object-cover rounded-t-xl" loading="lazy">
-          <div class="p-4">
-            <h3 class="font-semibold text-sm truncate">{movie.Title}</h3>
-            <p class="text-gray-600 text-xs">{movie.Year}</p>
-          </div>
-        </div>
-      )) || Array(6).fill().map((_, index) => <SkeletonCard />)}
-    </div>
-  </section>
+	<Section title="Peliculas" movies={latestMovies.Search} delay="0.4s" />
 
-  <!-- Últimos Lanzamientos - Series -->
-  <section class="py-12 px-4 animate-fade-in-up" style="animation-delay: 0.4s;">
-    <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-semibold">Series</h3>
-        <button class="px-4 py-2 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors text-sm">Ver Todos</button>
-    </div>
-    <div class="md:grid md:grid-cols-4 lg:grid-cols-6 md:gap-4 flex overflow-x-auto space-x-4 md:space-x-0 pb-4">
-      {latestSeries.Search?.slice(0, 6).map((series, index) => (
-        <div class="shrink-0 w-40 md:w-auto bg-linear-to-br from-white to-gray-50 bg-opacity-90 backdrop-blur-xl rounded-xl overflow-hidden hover:scale-105 transition-all duration-500 ease-out animate-fade-in-up cursor-pointer card h-64" data-imdbid={series.imdbID}>
-          <img src={series.Poster !== 'N/A' ? series.Poster : placeholderSmall} alt={series.Title} class="w-full h-48 object-cover rounded-t-xl" loading="lazy">
-          <div class="p-4">
-            <h3 class="font-semibold text-sm truncate">{series.Title}</h3>
-            <p class="text-gray-600 text-xs">{series.Year}</p>
-          </div>
-        </div>
-      )) || Array(6).fill().map((_, index) => <SkeletonCard />)}
-    </div>
-  </section>
+	<Section title="Series" movies={latestSeries.Search} delay="0.4s" />
 
-  <!-- Categorías Principales -->
-  <section class="py-12 px-4 animate-fade-in-up" style="animation-delay: 0.6s;">
-    
-    <!-- Terror -->
-    <div class="mb-8">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-2xl font-semibold">Terror</h3>
-        <button class="px-4 py-2 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors text-sm">Ver Todos</button>
-      </div>
-      <div class="md:grid md:grid-cols-4 lg:grid-cols-6 md:gap-4 flex overflow-x-auto space-x-4 md:space-x-0 pb-4">
-        {horrorMovies.Search?.slice(0, 6).map((movie, index) => (
-          <div class="shrink-0 w-40 md:w-auto bg-linear-to-br from-white to-gray-50 bg-opacity-90 backdrop-blur-xl rounded-xl overflow-hidden hover:scale-105 transition-all duration-500 ease-out animate-fade-in-up cursor-pointer card h-64" data-imdbid={movie.imdbID}>
-            <img src={movie.Poster !== 'N/A' ? movie.Poster : placeholderSmall} alt={movie.Title} class="w-full h-48 object-cover rounded-t-xl" loading="lazy">
-            <div class="p-4">
-              <h3 class="font-semibold text-sm truncate">{movie.Title}</h3>
-              <p class="text-gray-600 text-xs">{movie.Year}</p>
-            </div>
-          </div>
-        )) || Array(6).fill().map((_, index) => <SkeletonCard />)}
-      </div>
-    </div>
+	<Section title="Terror" movies={horrorMovies.Search} delay="0.4s" />
 
-    <!-- Acción -->
-    <div class="mb-8">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-2xl font-semibold">Acción</h3>
-        <button class="px-4 py-2 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors text-sm">Ver Todos</button>
-      </div>
-      <div class="md:grid md:grid-cols-4 lg:grid-cols-6 md:gap-4 flex overflow-x-auto space-x-4 md:space-x-0 pb-4">
-        {actionMovies.Search?.slice(0, 6).map((movie, index) => (
-          <div class="shrink-0 w-40 md:w-auto bg-linear-to-br from-white to-gray-50 bg-opacity-90 backdrop-blur-xl rounded-xl overflow-hidden hover:scale-105 transition-all duration-500 ease-out animate-fade-in-up cursor-pointer card h-64" data-imdbid={movie.imdbID}>
-            <img src={movie.Poster !== 'N/A' ? movie.Poster : placeholderSmall} alt={movie.Title} class="w-full h-48 object-cover rounded-t-xl" loading="lazy">
-            <div class="p-4">
-              <h3 class="font-semibold text-sm truncate">{movie.Title}</h3>
-              <p class="text-gray-600 text-xs">{movie.Year}</p>
-            </div>
-          </div>
-        )) || Array(6).fill().map((_, index) => <SkeletonCard />)}
-      </div>
-    </div>
-  </section>
+	<Section title="Acción" movies={actionMovies.Search} delay="0.4s" />
+
+	<Modal />
 </Layout>
 
-<!-- Modal -->
-<div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-md hidden z-50 flex items-center justify-center opacity-0 scale-95 transition-all duration-300 ease-out">
-  <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-    <div class="relative p-6">
-      <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
-        <span class="material-icons text-2xl">close</span>
-      </button>
-      <div id="modal-content" class="pt-8">
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-  // Placeholder images
-  const placeholderLarge = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+	import { fetchMovieDetails } from "../lib/api.js";
 
-  async function openModal(imdbID) {
-    const response = await fetch(`http://www.omdbapi.com/?i=${imdbID}&apikey=f0331b30`);
-    const data = await response.json();
-    
-    const modalContent = document.getElementById('modal-content');
-    modalContent.innerHTML = `
-      <img src="${data.Poster !== 'N/A' ? data.Poster : placeholderLarge}" alt="${data.Title}" class="w-full h-64 object-cover rounded-xl mb-4 shadow-lg">
+	// Placeholder images
+	const placeholderLarge =
+		"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=";
+
+	async function openModal(imdbID: string) {
+		const data = await fetchMovieDetails(imdbID);
+
+		const modalContent = document.getElementById("modal-content");
+		if (!modalContent) {
+			console.error("Modal no encontrado");
+			return;
+		}
+		modalContent.innerHTML = `
+      <img src="${data.Poster !== "N/A" ? data.Poster : placeholderLarge}" alt="${data.Title}" class="w-full h-64 object-cover rounded-xl mb-4 shadow-lg">
       <h2 class="text-2xl font-bold mb-2 text-gray-800">${data.Title}</h2>
       <div class="flex items-center gap-2 mb-3 text-sm text-gray-600">
         <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${data.Year}</span>
-        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">${data.Genre?.split(',')[0]}</span>
+        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">${data.Genre?.split(",")[0]}</span>
         <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full">${data.Runtime}</span>
       </div>
       <p class="text-gray-700 mb-4 leading-relaxed">${data.Plot}</p>
@@ -169,41 +98,63 @@ const placeholderLarge = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWln
         <p><strong class="text-gray-800">IMDB Rating:</strong> <span class="text-yellow-600 font-semibold">${data.imdbRating}</span></p>
       </div>
     `;
-    
-    const modal = document.getElementById('modal');
-    modal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-    setTimeout(() => {
-      modal.classList.remove('opacity-0', 'scale-95');
-      modal.classList.add('opacity-100', 'scale-100');
-    }, 10);
-  }
 
-  function closeModal() {
-    const modal = document.getElementById('modal');
-    modal.classList.remove('opacity-100', 'scale-100');
-    modal.classList.add('opacity-0', 'scale-95');
-    document.body.classList.remove('overflow-hidden');
-    setTimeout(() => {
-      modal.classList.add('hidden');
-    }, 300);
-  }
+		const modal = document.getElementById("modal");
+		if (!modal) {
+			console.error("Modal no encontrado");
+			return;
+		}
+		modal.classList.remove("hidden");
+		document.body.classList.add("overflow-hidden");
+		setTimeout(() => {
+			modal.classList.remove("opacity-0", "scale-95");
+			modal.classList.add("opacity-100", "scale-100");
+		}, 10);
+	}
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-      card.addEventListener('click', () => {
-        const imdbID = card.getAttribute('data-imdbid');
-        openModal(imdbID);
-      });
-    });
+	function closeModal() {
+		const modal = document.getElementById("modal");
+		if (!modal) {
+			console.error("Modal no encontrado");
+			return;
+		}
+		modal.classList.remove("opacity-100", "scale-100");
+		modal.classList.add("opacity-0", "scale-95");
+		document.body.classList.remove("overflow-hidden");
+		setTimeout(() => {
+			modal.classList.add("hidden");
+		}, 300);
+	}
 
-    document.getElementById('close-modal').addEventListener('click', closeModal);
+	document.addEventListener("DOMContentLoaded", () => {
+		const cards = document.querySelectorAll(".card");
+		cards.forEach((card) => {
+			card.addEventListener("click", () => {
+				const imdbID = card.getAttribute("data-imdbid");
+				if (imdbID) {
+					openModal(imdbID);
+				} else {
+					console.error("IMDBID No encontrado");
+				}
+			});
+		});
 
-    document.getElementById('modal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('modal')) {
-        closeModal();
-      }
-    });
-  });
+		const closeModalBtn = document.getElementById("close-modal");
+		if (closeModalBtn) {
+			closeModalBtn.addEventListener("click", closeModal);
+		} else {
+			console.error("Close modal button not found");
+		}
+
+		const modal = document.getElementById("modal");
+		if (modal) {
+			modal.addEventListener("click", (e: MouseEvent) => {
+				if (e.target === modal) {
+					closeModal();
+				}
+			});
+		} else {
+			console.error("Modal element not found");
+		}
+	});
 </script>
