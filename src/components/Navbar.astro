@@ -1,0 +1,46 @@
+---
+// Navbar component
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="fixed md:top-4 bottom-4 md:bottom-auto left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 backdrop-blur-lg shadow-xl rounded-full px-4 py-3 z-50">
+  <div class="flex items-center justify-center space-x-6 md:space-x-10">
+    <a href="/" class={`flex items-center space-x-1 md:space-x-2 transition-colors ${currentPath === '/' ? 'text-blue-600' : 'text-gray-800 hover:text-blue-600'}`}>
+      <span class="material-icons text-sm md:text-base">home</span>
+      <span class="text-sm md:text-base">Inicio</span>
+    </a>
+    <button id="search-btn" class={`flex items-center space-x-1 md:space-x-2 transition-colors text-gray-800 hover:text-blue-600`}>
+      <span class="material-icons text-sm md:text-base">search</span>
+      <span class="text-sm md:text-base">Buscar</span>
+    </button>
+    <a href="/swiper" class={`flex items-center space-x-1 md:space-x-2 transition-colors ${currentPath === '/swiper' ? 'text-blue-600' : 'text-gray-800 hover:text-blue-600'}`}>
+      <span class="material-icons text-sm md:text-base">view_carousel</span>
+      <span class="text-sm md:text-base">Swiper</span>
+    </a>
+    <a href="/favoritos" class={`flex items-center space-x-1 md:space-x-2 transition-colors ${currentPath === '/favoritos' ? 'text-blue-600' : 'text-gray-800 hover:text-blue-600'}`}>
+      <span class="material-icons text-sm md:text-base">favorite</span>
+      <span class="text-sm md:text-base">Favoritos</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Search Dropdown -->
+<div id="search-dropdown" class="fixed md:top-20 bottom-20 md:bottom-auto left-1/2 transform -translate-x-1/2 bg-white bg-opacity-90 backdrop-blur-lg shadow-xl rounded-full px-4 py-3 z-40 hidden">
+  <input type="text" placeholder="Buscar..." class="bg-transparent outline-none text-gray-800 placeholder-gray-500 w-48 md:w-64">
+</div>
+
+<script>
+  const searchBtn = document.getElementById('search-btn');
+  const searchDropdown = document.getElementById('search-dropdown');
+
+  searchBtn.addEventListener('click', () => {
+    searchDropdown.classList.toggle('hidden');
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!searchBtn.contains(e.target) && !searchDropdown.contains(e.target)) {
+      searchDropdown.classList.add('hidden');
+    }
+  });
+</script>
