@@ -105,6 +105,7 @@ const similarMovies = primaryGenre ? await fetchSimilarMovies(primaryGenre, imdb
                 <button
                   id="favorite-btn"
                   class="inline-flex items-center gap-2 bg-white text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg"
+                  data-imdbid={imdbID}
                 >
                   <span class="material-icons text-red-500">favorite_border</span>
                   Agregar a Favoritos
@@ -268,10 +269,10 @@ const similarMovies = primaryGenre ? await fetchSimilarMovies(primaryGenre, imdb
 
     const favoriteBtn = document.getElementById('favorite-btn');
     if (favoriteBtn) {
-      const imdbID = '{imdbID}';
+      const imdbID = favoriteBtn.getAttribute('data-imdbid');
       const icon = favoriteBtn.querySelector('.material-icons');
 
-      if (icon) {
+      if (icon && imdbID) {
         // Initialize button state
         if (isFavorite(imdbID)) {
           icon.textContent = 'favorite';
