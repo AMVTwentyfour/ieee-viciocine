@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Card from '../components/Card.astro';
 import { fetchLatestMovies, fetchLatestSeries } from '../lib/api.js';
 
 export const prerender = false; // Enable SSR for dynamic content
@@ -25,65 +26,19 @@ const shuffledContent = allContent.sort(() => Math.random() - 0.5).slice(0, 20);
 ---
 
 <Layout>
-  <div class="min-h-screen bg-linear-to-br from-purple-900 via-blue-900 to-indigo-900 py-8 pt-10 md:pt-32 pb-24 md:pb-0">
+  <div class="min-h-screen bg-[rgb(var(--bg))] py-8 pt-10 md:pt-32 pb-24 md:pb-0">
     <div class="max-w-md mx-auto px-4">
       <!-- Header -->
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">Swiper</h1>
-        <p class="text-gray-300">Desliza para encontrar tu próxima película favorita</p>
+        <h1 class="text-3xl font-bold text-[rgb(var(--text))] mb-2">Swiper</h1>
+        <p class="text-[rgb(var(--text))]">Desliza para encontrar tu próxima película favorita</p>
       </div>
 
       <!-- Swiper Container -->
       <div id="swiper-container" class="relative h-[600px] mb-8">
         {shuffledContent.map((item, index) => {
           const shadowClass = index === 0 ? 'shadow-2xl' : index === 1 ? 'shadow-lg' : index === 2 ? 'shadow-md' : 'shadow-sm';
-          return (
-            <div
-              class={`swiper-card absolute inset-0 bg-[rgb(var(--card-bg))] rounded-3xl ${shadowClass} overflow-hidden transform transition-all duration-300 ${index === 0 ? 'z-10' : 'z-0'} ${index > 2 ? 'hidden' : ''}`}
-              data-imdbid={item.imdbID}
-              data-title={item.Title}
-              data-poster={item.Poster}
-              data-year={item.Year}
-              data-type={item.Type}
-            >
-            <!-- Card Image -->
-            <div class="relative h-3/4 overflow-hidden">
-              <img
-                src={item.Poster !== 'N/A' ? item.Poster : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}
-                alt={item.Title}
-                class="w-full h-full object-cover"
-                loading="lazy"
-              />
-              <!-- Overlay linear -->
-              <div class="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
-
-              <!-- Type badge -->
-              <div class="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {item.Type === 'movie' ? 'Película' : 'Serie'}
-              </div>
-
-              <!-- Action indicators -->
-              <div class="absolute top-1/2 left-4 transform -translate-y-1/2 opacity-0 transition-opacity duration-300" id="nope-indicator">
-                <div class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-xl rotate-12 shadow-lg">
-                  NOPE
-                </div>
-              </div>
-              <div class="absolute top-1/2 right-4 transform -translate-y-1/2 opacity-0 transition-opacity duration-300" id="like-indicator">
-                <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-xl -rotate-12 shadow-lg">
-                  LIKE
-                </div>
-              </div>
-            </div>
-
-            <!-- Card Content -->
-            <div class="p-6 h-1/4 flex flex-col justify-between">
-              <div>
-                <h3 class="text-xl font-bold text-[rgb(var(--text))] mb-1 line-clamp-2">{item.Title}</h3>
-                <p class="text-[rgb(var(--text-secondary))]">{item.Year}</p>
-              </div>
-            </div>
-          </div>
-        );
+          return <Card movie={item} class={`swiper-card absolute inset-0 ${shadowClass} overflow-hidden transform transition-all duration-300 ${index === 0 ? 'z-10' : 'z-0'} ${index > 2 ? 'hidden' : ''}`} />
         })}
       </div>
 
