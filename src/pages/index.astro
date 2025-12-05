@@ -10,16 +10,36 @@ import {
 } from "../lib/api.js";
 
 // Fetch latest movies (2024)
-const latestMovies = await fetchLatestMovies("2025");
+let latestMovies = { Search: [] };
+try {
+  latestMovies = await fetchLatestMovies("2025");
+} catch (error) {
+  console.error('Error fetching latest movies:', error);
+}
 
 // Fetch latest series (2024)
-const latestSeries = await fetchLatestSeries("2025");
+let latestSeries = { Search: [] };
+try {
+  latestSeries = await fetchLatestSeries("2025");
+} catch (error) {
+  console.error('Error fetching latest series:', error);
+}
 
 // Fetch horror movies
-const horrorMovies = await fetchMoviesByGenre("horror", "movie");
+let horrorMovies = { Search: [] };
+try {
+  horrorMovies = await fetchMoviesByGenre("horror", "movie");
+} catch (error) {
+  console.error('Error fetching horror movies:', error);
+}
 
 // Fetch action movies
-const actionMovies = await fetchMoviesByGenre("action", "movie");
+let actionMovies = { Search: [] };
+try {
+  actionMovies = await fetchMoviesByGenre("action", "movie");
+} catch (error) {
+  console.error('Error fetching action movies:', error);
+}
 ---
 
 <Layout>
@@ -73,30 +93,33 @@ const actionMovies = await fetchMoviesByGenre("action", "movie");
 	import { addFavorite, removeFavorite, isFavorite } from "../lib/favorites.js";
 
 	// Placeholder images
-	const placeholderLarge =
-		"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=";
+	const placeholderLarge = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=";
 
 	async function openModal(imdbID: string) {
-		const data = await fetchMovieDetails(imdbID);
+		try {
+			const data = await fetchMovieDetails(imdbID);
 
 		const modalContent = document.getElementById("modal-content");
 		if (!modalContent) {
 			console.error("Modal no encontrado");
 			return;
 		}
+
+		const posterUrl = data.Poster && data.Poster !== "N/A" ? data.Poster : placeholderLarge;
+
 		modalContent.innerHTML = `
-      <img src="${data.Poster !== "N/A" ? data.Poster : placeholderLarge}" alt="${data.Title}" class="w-full h-64 object-cover rounded-xl mb-4 shadow-lg">
-      <h2 class="text-2xl font-bold mb-2 text-gray-800">${data.Title}</h2>
+      <img src="${posterUrl}" alt="${data.Title || 'Movie'}" class="w-full h-64 object-cover rounded-xl mb-4 shadow-lg">
+      <h2 class="text-2xl font-bold mb-2 text-gray-800">${data.Title || 'Unknown Title'}</h2>
       <div class="flex items-center gap-2 mb-3 text-sm text-gray-600">
-        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${data.Year}</span>
-        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">${data.Genre?.split(",")[0]}</span>
-        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full">${data.Runtime}</span>
+        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${data.Year || 'N/A'}</span>
+        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">${data.Genre?.split(',')[0] || 'N/A'}</span>
+        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full">${data.Runtime || 'N/A'}</span>
       </div>
-      <p class="text-gray-700 mb-4 leading-relaxed">${data.Plot}</p>
+      <p class="text-gray-700 mb-4 leading-relaxed">${data.Plot || 'No description available.'}</p>
       <div class="grid grid-cols-1 gap-2 text-sm mb-6">
-        <p><strong class="text-gray-800">Director:</strong> ${data.Director}</p>
-        <p><strong class="text-gray-800">Actores:</strong> ${data.Actors}</p>
-        <p><strong class="text-gray-800">IMDB Rating:</strong> <span class="text-yellow-600 font-semibold">${data.imdbRating}</span></p>
+        <p><strong class="text-gray-800">Director:</strong> ${data.Director || 'N/A'}</p>
+        <p><strong class="text-gray-800">Actores:</strong> ${data.Actors || 'N/A'}</p>
+        <p><strong class="text-gray-800">IMDB Rating:</strong> <span class="text-yellow-600 font-semibold">${data.imdbRating || 'N/A'}</span></p>
       </div>
       <div class="flex gap-3">
         <a href="/movie/${imdbID}" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center">
@@ -130,6 +153,20 @@ const actionMovies = await fetchMoviesByGenre("action", "movie");
 					icon.textContent = "favorite_border";
 					icon.classList.remove("text-red-600");
 				}
+			}
+		}
+		} catch (error) {
+			console.error('Error opening modal:', error);
+			// Show error message in modal
+			const modalContent = document.getElementById("modal-content");
+			if (modalContent) {
+				modalContent.innerHTML = `
+					<div class="text-center py-8">
+						<div class="material-icons text-6xl text-red-400 mb-4">error</div>
+						<h3 class="text-xl font-semibold text-gray-800 mb-2">Error al cargar la película</h3>
+						<p class="text-gray-600">No se pudo obtener la información de la película.</p>
+					</div>
+				`;
 			}
 		}
 	}
