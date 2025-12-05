@@ -4,17 +4,27 @@ export function getFavorites() {
   return favorites ? JSON.parse(favorites) : [];
 }
 
-export function addFavorite(imdbID) {
+export function addFavorite(imdbID, movieData) {
   const favorites = getFavorites();
-  if (!favorites.includes(imdbID)) {
-    favorites.push(imdbID);
+
+  // Check if already exists
+  const exists = favorites.some(fav => fav.imdbID === imdbID);
+
+  if (!exists) {
+    if (movieData && typeof movieData === 'object') {
+      // Store complete movie data
+      favorites.push({ imdbID, ...movieData });
+    } else {
+      // Fallback to just ID (for backward compatibility)
+      favorites.push({ imdbID });
+    }
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }
 }
 
 export function removeFavorite(imdbID) {
   const favorites = getFavorites();
-  const index = favorites.indexOf(imdbID);
+  const index = favorites.findIndex(fav => fav.imdbID === imdbID);
   if (index > -1) {
     favorites.splice(index, 1);
     localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -23,5 +33,5 @@ export function removeFavorite(imdbID) {
 
 export function isFavorite(imdbID) {
   const favorites = getFavorites();
-  return favorites.includes(imdbID);
+  return favorites.some(fav => fav.imdbID === imdbID);
 }

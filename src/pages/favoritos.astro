@@ -31,13 +31,13 @@ import Modal from '../components/Modal.astro';
   import { fetchMovieDetails } from '../lib/api.js';
 
   async function loadFavorites() {
-    const favoriteIds = getFavorites();
+    const favorites = getFavorites();
     const container = document.getElementById('favorites-container');
     const emptyState = document.getElementById('empty-state');
 
     if (!container || !emptyState) return;
 
-    if (favoriteIds.length === 0) {
+    if (favorites.length === 0) {
       emptyState.classList.remove('hidden');
       return;
     }
@@ -47,9 +47,17 @@ import Modal from '../components/Modal.astro';
 
     let loadedCount = 0;
 
-    for (const id of favoriteIds) {
+    for (const favorite of favorites) {
       try {
-        const movie = await fetchMovieDetails(id);
+        // If we have complete movie data, use it directly
+        let movie;
+        if (favorite.Title && favorite.Poster) {
+          movie = favorite;
+        } else {
+          // Fallback: fetch movie details using imdbID
+          movie = await fetchMovieDetails(favorite.imdbID);
+        }
+
         if (movie && movie.Title && movie.imdbID) {
           const cardHTML = `
             <div class="shrink-0 w-40 md:w-auto bg-linear-to-br from-white to-gray-50 bg-opacity-90 backdrop-blur-xl rounded-xl overflow-hidden hover:scale-105 transition-all duration-500 ease-out animate-fade-in-up cursor-pointer card h-64 relative" data-imdbid="${movie.imdbID}">
@@ -95,7 +103,7 @@ import Modal from '../components/Modal.astro';
         if (imdbID) {
           // Remove from favorites and reload
           const favorites = getFavorites();
-          const index = favorites.indexOf(imdbID);
+          const index = favorites.findIndex(fav => fav.imdbID === imdbID);
           if (index > -1) {
             favorites.splice(index, 1);
             localStorage.setItem('favorites', JSON.stringify(favorites));

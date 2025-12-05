@@ -1,10 +1,530 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { fetchLatestMovies, fetchLatestSeries } from '../lib/api.js';
+
+export const prerender = false; // Enable SSR for dynamic content
+
+// Fetch movies and series for swiper
+let movies = [];
+let series = [];
+
+try {
+  const [moviesData, seriesData] = await Promise.all([
+    fetchLatestMovies(),
+    fetchLatestSeries()
+  ]);
+
+  movies = moviesData.Search || [];
+  series = seriesData.Search || [];
+} catch (error) {
+  console.error('Error fetching content for swiper:', error);
+}
+
+const allContent = [...movies, ...series];
+const shuffledContent = allContent.sort(() => Math.random() - 0.5).slice(0, 20); // Start with 20 items
 ---
 
 <Layout>
-  <div class="py-12 px-4 text-center">
-    <h1 class="text-3xl font-bold mb-4">Swiper - Próximamente</h1>
-    <p>La funcionalidad de swiper como Tinder para películas estará aquí.</p>
+  <div class="min-h-screen bg-linear-to-br from-purple-900 via-blue-900 to-indigo-900 py-8 pt-10 md:pt-32 pb-24 md:pb-0">
+    <div class="max-w-md mx-auto px-4">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">Swiper</h1>
+        <p class="text-gray-300">Desliza para encontrar tu próxima película favorita</p>
+      </div>
+
+      <!-- Swiper Container -->
+      <div id="swiper-container" class="relative h-[600px] mb-8">
+        {shuffledContent.map((item, index) => {
+          const shadowClass = index === 0 ? 'shadow-2xl' : index === 1 ? 'shadow-lg' : index === 2 ? 'shadow-md' : 'shadow-sm';
+          return (
+            <div
+              class={`swiper-card absolute inset-0 bg-white rounded-3xl ${shadowClass} overflow-hidden transform transition-all duration-300 ${index === 0 ? 'z-10' : 'z-0'} ${index > 2 ? 'hidden' : ''}`}
+              data-imdbid={item.imdbID}
+              data-title={item.Title}
+              data-poster={item.Poster}
+              data-year={item.Year}
+              data-type={item.Type}
+            >
+            <!-- Card Image -->
+            <div class="relative h-3/4 overflow-hidden">
+              <img
+                src={item.Poster !== 'N/A' ? item.Poster : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}
+                alt={item.Title}
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <!-- Overlay linear -->
+              <div class="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
+
+              <!-- Type badge -->
+              <div class="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium">
+                {item.Type === 'movie' ? 'Película' : 'Serie'}
+              </div>
+
+              <!-- Action indicators -->
+              <div class="absolute top-1/2 left-4 transform -translate-y-1/2 opacity-0 transition-opacity duration-300" id="nope-indicator">
+                <div class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-xl rotate-12 shadow-lg">
+                  NOPE
+                </div>
+              </div>
+              <div class="absolute top-1/2 right-4 transform -translate-y-1/2 opacity-0 transition-opacity duration-300" id="like-indicator">
+                <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-xl -rotate-12 shadow-lg">
+                  LIKE
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Content -->
+            <div class="p-6 h-1/4 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xl font-bold text-gray-800 mb-1 line-clamp-2">{item.Title}</h3>
+                <p class="text-gray-600">{item.Year}</p>
+              </div>
+            </div>
+          </div>
+        );
+        })}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-center space-x-8">
+        <button
+          id="dislike-btn"
+          class="w-16 h-16 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all duration-200 hover:scale-110 flex items-center justify-center"
+        >
+          <span class="material-icons text-2xl">close</span>
+        </button>
+
+        <button
+          id="like-btn"
+          class="w-16 h-16 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg transition-all duration-200 hover:scale-110 flex items-center justify-center"
+        >
+          <span class="material-icons text-2xl">favorite</span>
+        </button>
+      </div>
+
+      <!-- No more cards message -->
+      <div id="no-more-cards" class="hidden text-center mt-8">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
+          <div class="material-icons text-6xl text-white mb-4">refresh</div>
+          <h3 class="text-xl font-bold text-white mb-2">¡Hemos visto muchas películas!</h3>
+          <p class="text-gray-300 mb-6">Has explorado una gran cantidad de contenido. ¿Quieres empezar de nuevo?</p>
+          <button
+            onclick="window.location.reload()"
+            class="bg-white text-purple-900 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Explorar más
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </Layout>
+
+<script>
+  import { addFavorite, isFavorite } from '../lib/favorites.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.swiper-card');
+    const dislikeBtn = document.getElementById('dislike-btn');
+    const likeBtn = document.getElementById('like-btn');
+    const noMoreCards = document.getElementById('no-more-cards');
+
+    let currentCardIndex = 0;
+    let isAnimating = false;
+    let loadAttempts = 0;
+    const maxLoadAttempts = 10; // Prevent infinite loading attempts
+    let allCardsData = Array.from(cards).map(card => ({
+      element: card,
+      imdbID: card.getAttribute('data-imdbid'),
+      title: card.getAttribute('data-title'),
+      poster: card.getAttribute('data-poster'),
+      year: card.getAttribute('data-year'),
+      type: card.getAttribute('data-type')
+    }));
+
+    // Filter out cards that are already in favorites
+    allCardsData = allCardsData.filter(cardData => !isFavorite(cardData.imdbID));
+
+    // If we don't have enough cards after filtering, load more
+    if (allCardsData.length < 5) {
+      loadMoreContent().then(newContent => {
+        if (newContent.length > 0) {
+          addNewCards(newContent);
+        }
+      });
+    }
+
+    // Function to load more content
+    async function loadMoreContent() {
+      try {
+        // Try different strategies to get new content
+        const strategies = [
+          // Strategy 1: Random year
+          () => {
+            const years = ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017'];
+            const randomYear = years[Math.floor(Math.random() * years.length)];
+            return fetch(`/api/movies?year=${randomYear}`);
+          },
+          // Strategy 2: Random series year
+          () => {
+            const years = ['2024', '2023', '2022', '2021', '2020', '2019', '2018'];
+            const randomYear = years[Math.floor(Math.random() * years.length)];
+            return fetch(`/api/series?year=${randomYear}`);
+          }
+        ];
+
+        // Try strategies in random order
+        const shuffledStrategies = strategies.sort(() => Math.random() - 0.5);
+
+        for (const strategy of shuffledStrategies) {
+          try {
+            const response = await strategy();
+            if (response.ok) {
+              const data = await response.json();
+              const content = data.Search || [];
+
+              // Filter out movies/series that are already in favorites or already shown
+              const shownIds = allCardsData.map(card => card.imdbID);
+              const filteredContent = content.filter((item: any) =>
+                !isFavorite(item.imdbID) && !shownIds.includes(item.imdbID)
+              );
+
+              if (filteredContent.length > 0) {
+                return filteredContent.sort(() => Math.random() - 0.5).slice(0, 12);
+              }
+            }
+          } catch (error) {
+            console.warn('Strategy failed:', error);
+            continue;
+          }
+        }
+
+        // If all strategies failed, return empty array
+        return [];
+      } catch (error) {
+        console.error('Error loading more content:', error);
+        return [];
+      }
+    }
+
+    // Function to add new cards to the DOM
+    function addNewCards(newContent: any[]) {
+      const container = document.getElementById('swiper-container');
+      if (!container) {
+        console.error("Contenedor swipper no encontrado")
+        return;
+      }
+
+      newContent.forEach((item: any) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `swiper-card absolute inset-0 bg-white rounded-3xl shadow-sm overflow-hidden transform transition-all duration-300 z-0 hidden`;
+        cardDiv.setAttribute('data-imdbid', item.imdbID);
+        cardDiv.setAttribute('data-title', item.Title);
+        cardDiv.setAttribute('data-poster', item.Poster);
+        cardDiv.setAttribute('data-year', item.Year);
+        cardDiv.setAttribute('data-type', item.Type);
+
+        cardDiv.innerHTML = `
+          <div class="relative h-3/4 overflow-hidden">
+            <img
+              src="${item.Poster !== 'N/A' ? item.Poster : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}"
+              alt="${item.Title}"
+              class="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
+            <div class="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium">
+              ${item.Type === 'movie' ? 'Película' : 'Serie'}
+            </div>
+            <div class="absolute top-1/2 left-4 transform -translate-y-1/2 opacity-0 transition-opacity duration-300" id="nope-indicator">
+              <div class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-xl rotate-12 shadow-lg">NOPE</div>
+            </div>
+            <div class="absolute top-1/2 right-4 transform -translate-y-1/2 opacity-0 transition-opacity duration-300" id="like-indicator">
+              <div class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-xl -rotate-12 shadow-lg">LIKE</div>
+            </div>
+          </div>
+          <div class="p-6 h-1/4 flex flex-col justify-between">
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 mb-1 line-clamp-2">${item.Title}</h3>
+              <p class="text-gray-600">${item.Year}</p>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(cardDiv);
+
+        // Add touch/mouse events to new card
+        cardDiv.addEventListener('touchstart', handleStart, { passive: false });
+        cardDiv.addEventListener('touchmove', handleMove, { passive: false });
+        cardDiv.addEventListener('touchend', handleEnd, { passive: false });
+        cardDiv.addEventListener('mousedown', handleStart);
+
+        // Add to cards data
+        allCardsData.push({
+          element: cardDiv,
+          imdbID: item.imdbID,
+          title: item.Title,
+          poster: item.Poster,
+          year: item.Year,
+          type: item.Type
+        });
+      });
+
+      // Update the card stack to include new cards
+      updateCardStack();
+    }
+
+    function updateCardStack() {
+      allCardsData.forEach((cardData, index) => {
+        // Remove existing shadow classes
+        cardData.element.classList.remove('shadow-sm', 'shadow-md', 'shadow-lg', 'shadow-2xl');
+
+        if (index >= currentCardIndex && index < currentCardIndex + 3) {
+          const stackIndex = index - currentCardIndex;
+          const scale = 1 - stackIndex * 0.05;
+          const translateY = stackIndex * 8;
+
+          // Apply appropriate shadow based on stack position
+          const shadowClass = stackIndex === 0 ? 'shadow-2xl' : stackIndex === 1 ? 'shadow-lg' : 'shadow-md';
+          cardData.element.classList.add(shadowClass);
+
+          cardData.element.style.transform = `scale(${scale}) translateY(${translateY}px)`;
+          cardData.element.style.zIndex = 10 - stackIndex;
+          cardData.element.classList.remove('hidden');
+        } else if (index > currentCardIndex + 2) {
+          cardData.element.classList.add('hidden');
+        }
+      });
+    }
+
+    function showNextCard() {
+      // If we're running low on cards (3 or fewer remaining), load more
+      if (allCardsData.length - currentCardIndex <= 3 && loadAttempts < maxLoadAttempts) {
+        loadAttempts++;
+        loadMoreContent().then(newContent => {
+          if (newContent.length > 0) {
+            addNewCards(newContent);
+            loadAttempts = 0; // Reset attempts on successful load
+          } else if (loadAttempts >= maxLoadAttempts) {
+            const swiperContainer = document.getElementById('swiper-container');
+            if (swiperContainer) {
+              swiperContainer.classList.add('hidden');
+            } else {
+              console.error('Swiper container element not found');
+            }
+            if (noMoreCards) {
+              noMoreCards.classList.remove('hidden');
+            } else {
+              console.error('No more cards element not found');
+            }
+            isAnimating = false; // Reset animation state
+            return;
+          }
+          proceedToNextCard();
+        }).catch(() => {
+          proceedToNextCard();
+        });
+      } else if (loadAttempts >= maxLoadAttempts) {
+        // No more content available
+        const swiperContainer = document.getElementById('swiper-container');
+        if (swiperContainer) {
+          swiperContainer.classList.add('hidden');
+        } else {
+          console.error('Swiper container element not found');
+        }
+        if (noMoreCards) {
+          noMoreCards.classList.remove('hidden');
+        } else {
+          console.error('No more cards element not found');
+        }
+        isAnimating = false; // Reset animation state
+        return;
+      } else {
+        proceedToNextCard();
+      }
+    }
+
+    function proceedToNextCard() {
+      currentCardIndex++;
+      isAnimating = false;
+
+      // Update card stack - show cards that should be visible
+      allCardsData.forEach((cardData, index) => {
+        if (index >= currentCardIndex && index < currentCardIndex + 3) {
+          const stackIndex = index - currentCardIndex;
+          const scale = 1 - stackIndex * 0.05;
+          const translateY = stackIndex * 8;
+          cardData.element.style.transform = `scale(${scale}) translateY(${translateY}px)`;
+          cardData.element.style.zIndex = 10 - stackIndex;
+          cardData.element.classList.remove('hidden');
+        }
+      });
+    }
+
+    function animateCard(card: any, direction: any, addToFavorites = false) {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      const rotation = direction === 'right' ? 15 : -15;
+      const translateX = direction === 'right' ? 300 : -300;
+
+      card.style.transition = 'all 0.3s ease-out';
+      card.style.transform = `translateX(${translateX}px) rotate(${rotation}deg)`;
+
+      // Show action indicator
+      const indicator = direction === 'right' ? card.querySelector('#like-indicator') : card.querySelector('#nope-indicator');
+      if (indicator) {
+        indicator.style.opacity = '1';
+      }
+
+      // Add to favorites if liked
+      if (addToFavorites) {
+        const imdbID = card.getAttribute('data-imdbid');
+        const title = card.getAttribute('data-title');
+        const poster = card.getAttribute('data-poster');
+        const year = card.getAttribute('data-year');
+        const type = card.getAttribute('data-type');
+
+        if (imdbID) {
+          addFavorite(imdbID, { Title: title, Poster: poster, Year: year, Type: type });
+        }
+      }
+
+      setTimeout(() => {
+        card.remove();
+        // Remove from allCardsData
+        allCardsData = allCardsData.filter(cardData => cardData.element !== card);
+        // Continue to next card
+        showNextCard();
+      }, 300);
+    }
+
+    // Button event listeners
+    dislikeBtn?.addEventListener('click', () => {
+      if (isAnimating || currentCardIndex >= allCardsData.length) return;
+      const currentCardData = allCardsData[currentCardIndex];
+      if (currentCardData) {
+        animateCard(currentCardData.element, 'left');
+      }
+    });
+
+    likeBtn?.addEventListener('click', () => {
+      if (isAnimating || currentCardIndex >= allCardsData.length) return;
+      const currentCardData = allCardsData[currentCardIndex];
+      if (currentCardData) {
+        animateCard(currentCardData.element, 'right', true);
+      }
+    });
+
+    // Touch/swipe functionality
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let isDragging = false;
+
+    function handleStart(e) {
+      if (isAnimating || currentCardIndex >= allCardsData.length) return;
+
+      const touch = e.touches ? e.touches[0] : e;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      isDragging = true;
+
+      const currentCardData = allCardsData[currentCardIndex];
+      if (currentCardData) {
+        currentCardData.element.style.transition = 'none';
+      }
+    }
+
+    function handleMove(e) {
+      if (!isDragging || isAnimating || currentCardIndex >= allCardsData.length) return;
+
+      e.preventDefault();
+      const touch = e.touches ? e.touches[0] : e;
+      currentX = touch.clientX - startX;
+      currentY = touch.clientY - startY;
+
+      const currentCardData = allCardsData[currentCardIndex];
+      if (currentCardData) {
+        const rotation = currentX * 0.1;
+        currentCardData.element.style.transform = `translateX(${currentX}px) translateY(${Math.abs(currentY) * 0.1}px) rotate(${rotation}deg)`;
+
+        // Show indicators based on swipe direction
+        const nopeIndicator = currentCardData.element.querySelector('#nope-indicator');
+        const likeIndicator = currentCardData.element.querySelector('#like-indicator');
+
+        if (currentX < -50) {
+          if (nopeIndicator) nopeIndicator.style.opacity = '1';
+          if (likeIndicator) likeIndicator.style.opacity = '0';
+        } else if (currentX > 50) {
+          if (likeIndicator) likeIndicator.style.opacity = '1';
+          if (nopeIndicator) nopeIndicator.style.opacity = '0';
+        } else {
+          if (nopeIndicator) nopeIndicator.style.opacity = '0';
+          if (likeIndicator) likeIndicator.style.opacity = '0';
+        }
+      }
+    }
+
+    function handleEnd(e) {
+      if (!isDragging || isAnimating) return;
+
+      isDragging = false;
+      const currentCardData = allCardsData[currentCardIndex];
+
+      if (!currentCardData) return;
+
+      const threshold = 100;
+
+      if (Math.abs(currentX) > threshold) {
+        const direction = currentX > 0 ? 'right' : 'left';
+        const addToFavorites = direction === 'right';
+        animateCard(currentCardData.element, direction, addToFavorites);
+      } else {
+        // Reset card position
+        currentCardData.element.style.transition = 'all 0.3s ease-out';
+        currentCardData.element.style.transform = 'translateX(0) translateY(0) rotate(0deg)';
+
+        const indicators = currentCardData.element.querySelectorAll('#nope-indicator, #like-indicator');
+        indicators.forEach(indicator => indicator.style.opacity = '0');
+      }
+    }
+
+    // Initialize cards
+    allCardsData.forEach((cardData, index) => {
+      // Remove existing shadow classes
+      cardData.element.classList.remove('shadow-sm', 'shadow-md', 'shadow-lg', 'shadow-2xl');
+
+      if (index >= currentCardIndex && index < currentCardIndex + 3) {
+        const stackIndex = index - currentCardIndex;
+        const scale = 1 - stackIndex * 0.05;
+        const translateY = stackIndex * 8;
+
+        // Apply appropriate shadow based on stack position
+        const shadowClass = stackIndex === 0 ? 'shadow-2xl' : stackIndex === 1 ? 'shadow-lg' : 'shadow-md';
+        cardData.element.classList.add(shadowClass);
+
+        cardData.element.style.transform = `scale(${scale}) translateY(${translateY}px)`;
+        cardData.element.style.zIndex = 10 - stackIndex;
+        cardData.element.classList.remove('hidden');
+      } else if (index > currentCardIndex + 2) {
+        cardData.element.classList.add('hidden');
+      }
+    });
+
+    // Add touch event listeners to initial cards
+    allCardsData.forEach(cardData => {
+      cardData.element.addEventListener('touchstart', handleStart, { passive: false });
+      cardData.element.addEventListener('touchmove', handleMove, { passive: false });
+      cardData.element.addEventListener('touchend', handleEnd, { passive: false });
+      cardData.element.addEventListener('mousedown', handleStart);
+    });
+
+    // Add global mouse events for desktop testing
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+  });
+</script>
