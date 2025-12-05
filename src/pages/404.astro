@@ -1,0 +1,61 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div class="max-w-md w-full text-center">
+      <!-- 404 Illustration -->
+      <div class="mb-8">
+        <div class="text-9xl text-gray-300 mb-4">
+          <span class="material-icons">movie</span>
+        </div>
+        <h1 class="text-6xl font-bold text-gray-800 mb-2">404</h1>
+        <h2 class="text-2xl font-semibold text-gray-600 mb-4">Página no encontrada</h2>
+        <p class="text-gray-500 mb-8">
+          Lo sentimos, la página que buscas no existe o ha sido movida.
+        </p>
+      </div>
+
+      <!-- Actions -->
+      <div class="space-y-4">
+        <a
+          href="/"
+          class="inline-block w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+        >
+          <span class="material-icons align-middle mr-2">home</span>
+          Ir al Inicio
+        </a>
+
+        <a
+          href="/favoritos"
+          class="inline-block w-full bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+        >
+          <span class="material-icons align-middle mr-2">favorite</span>
+          Ver Favoritos
+        </a>
+
+        <button
+          onclick="history.back()"
+          class="inline-block w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+        >
+          <span class="material-icons align-middle mr-2">arrow_back</span>
+          Volver Atrás
+        </button>
+      </div>
+
+      <!-- Fun Message -->
+      <div class="mt-12 p-4 bg-blue-50 rounded-lg">
+        <div class="flex items-start gap-3">
+          <span class="material-icons text-blue-600 mt-0.5">lightbulb</span>
+          <div>
+            <p class="text-blue-800 text-sm font-medium mb-1">¿Buscando una película?</p>
+            <p class="text-blue-700 text-sm">
+              Explora nuestro catálogo de películas más recientes y descubre tu próxima favorita.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

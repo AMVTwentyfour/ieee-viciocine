@@ -1,0 +1,219 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { fetchMovieDetails } from "../../lib/api.js";
+
+const { imdbID } = Astro.params;
+
+// Fetch movie details
+const movie = await fetchMovieDetails(imdbID);
+
+// Handle case where movie is not found
+if (!movie || movie.Response === 'False') {
+  return Astro.redirect('/404');
+}
+---
+
+<Layout>
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-6xl mx-auto px-4">
+      <!-- Back Button -->
+      <button
+        onclick="history.back()"
+        class="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+      >
+        <span class="material-icons">arrow_back</span>
+        Volver
+      </button>
+
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Hero Section -->
+        <div class="relative bg-linear-to-r from-blue-600 to-purple-700 text-white">
+          <div class="absolute inset-0 bg-black opacity-20"></div>
+          <div class="relative z-10 p-8 md:p-12">
+            <div class="flex flex-col md:flex-row gap-8 items-start">
+              <!-- Poster -->
+              <div class="shrink-0">
+                <img
+                  src={movie.Poster !== 'N/A' ? movie.Poster : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}
+                  alt={movie.Title}
+                  class="w-48 md:w-64 rounded-xl shadow-2xl"
+                />
+              </div>
+
+              <!-- Movie Info -->
+              <div class="flex-1">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">{movie.Title}</h1>
+
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                  <span class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                    {movie.Year}
+                  </span>
+                  {movie.Rated && movie.Rated !== 'N/A' && (
+                    <span class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                      {movie.Rated}
+                    </span>
+                  )}
+                  {movie.Runtime && movie.Runtime !== 'N/A' && (
+                    <span class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                      {movie.Runtime}
+                    </span>
+                  )}
+                </div>
+
+                <!-- Genres -->
+                {movie.Genre && movie.Genre !== 'N/A' && (
+                  <div class="flex flex-wrap gap-2 mb-6">
+                    {movie.Genre.split(', ').map((genre: string) => (
+                      <span class="bg-white/30 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <!-- Ratings -->
+                <div class="flex items-center gap-6 mb-6">
+                  {movie.imdbRating && movie.imdbRating !== 'N/A' && (
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-yellow-400 text-2xl">star</span>
+                      <div>
+                        <div class="font-bold">{movie.imdbRating}/10</div>
+                        <div class="text-sm opacity-90">IMDb</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {movie.Metascore && movie.Metascore !== 'N/A' && (
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-green-400 text-2xl">analytics</span>
+                      <div>
+                        <div class="font-bold">{movie.Metascore}%</div>
+                        <div class="text-sm opacity-90">Metascore</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <!-- Favorite Button -->
+                <button
+                  id="favorite-btn"
+                  class="inline-flex items-center gap-2 bg-white text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg"
+                >
+                  <span class="material-icons text-red-500">favorite_border</span>
+                  Agregar a Favoritos
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="p-8 md:p-12">
+          <!-- Plot -->
+          {movie.Plot && movie.Plot !== 'N/A' && (
+            <div class="mb-8">
+              <h2 class="text-2xl font-bold mb-4 text-gray-800">Sinopsis</h2>
+              <p class="text-gray-700 leading-relaxed text-lg">{movie.Plot}</p>
+            </div>
+          )}
+
+          <!-- Cast & Crew -->
+          <div class="grid md:grid-cols-2 gap-8 mb-8">
+            {movie.Director && movie.Director !== 'N/A' && (
+              <div>
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Director</h3>
+                <p class="text-gray-700">{movie.Director}</p>
+              </div>
+            )}
+
+            {movie.Writer && movie.Writer !== 'N/A' && (
+              <div>
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Guionista</h3>
+                <p class="text-gray-700">{movie.Writer}</p>
+              </div>
+            )}
+
+            {movie.Actors && movie.Actors !== 'N/A' && (
+              <div class="md:col-span-2">
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Reparto Principal</h3>
+                <p class="text-gray-700">{movie.Actors}</p>
+              </div>
+            )}
+          </div>
+
+          <!-- Additional Info -->
+          <div class="grid md:grid-cols-3 gap-6 mb-8">
+            {movie.Language && movie.Language !== 'N/A' && (
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-800 mb-2">Idioma</h4>
+                <p class="text-gray-700">{movie.Language}</p>
+              </div>
+            )}
+
+            {movie.Country && movie.Country !== 'N/A' && (
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-800 mb-2">País</h4>
+                <p class="text-gray-700">{movie.Country}</p>
+              </div>
+            )}
+
+            {movie.BoxOffice && movie.BoxOffice !== 'N/A' && (
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-800 mb-2">Recaudación</h4>
+                <p class="text-gray-700">{movie.BoxOffice}</p>
+              </div>
+            )}
+          </div>
+
+          <!-- Trailer Placeholder -->
+          <div class="bg-gray-100 p-8 rounded-xl text-center mb-8">
+            <div class="material-icons text-6xl text-gray-400 mb-4">play_circle</div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Trailer próximamente</h3>
+            <p class="text-gray-500">La integración con YouTube API estará disponible pronto</p>
+          </div>
+
+          <!-- Similar Movies Placeholder -->
+          <div class="bg-gray-100 p-8 rounded-xl text-center">
+            <div class="material-icons text-6xl text-gray-400 mb-4">movie</div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Títulos Similares</h3>
+            <p class="text-gray-500">Recomendaciones basadas en género próximamente</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { addFavorite, removeFavorite, isFavorite } from '../../lib/favorites.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const favoriteBtn = document.getElementById('favorite-btn');
+    if (favoriteBtn) {
+      const imdbID = '{imdbID}';
+      const icon = favoriteBtn.querySelector('.material-icons');
+
+      if (icon) {
+        // Initialize button state
+        if (isFavorite(imdbID)) {
+          icon.textContent = 'favorite';
+          favoriteBtn.innerHTML = '<span class="material-icons text-red-500">favorite</span> En Favoritos';
+        }
+
+        favoriteBtn.addEventListener('click', () => {
+          if (isFavorite(imdbID)) {
+            removeFavorite(imdbID);
+            icon.textContent = 'favorite_border';
+            favoriteBtn.innerHTML = '<span class="material-icons text-red-500">favorite_border</span> Agregar a Favoritos';
+          } else {
+            addFavorite(imdbID);
+            icon.textContent = 'favorite';
+            favoriteBtn.innerHTML = '<span class="material-icons text-red-500">favorite</span> En Favoritos';
+          }
+        });
+      } else {
+        console.error('Icon element not found in favorite button');
+      }
+    }
+  });
+</script>

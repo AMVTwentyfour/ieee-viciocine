@@ -93,10 +93,15 @@ const actionMovies = await fetchMoviesByGenre("action", "movie");
         <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full">${data.Runtime}</span>
       </div>
       <p class="text-gray-700 mb-4 leading-relaxed">${data.Plot}</p>
-      <div class="grid grid-cols-1 gap-2 text-sm">
+      <div class="grid grid-cols-1 gap-2 text-sm mb-6">
         <p><strong class="text-gray-800">Director:</strong> ${data.Director}</p>
         <p><strong class="text-gray-800">Actores:</strong> ${data.Actors}</p>
         <p><strong class="text-gray-800">IMDB Rating:</strong> <span class="text-yellow-600 font-semibold">${data.imdbRating}</span></p>
+      </div>
+      <div class="flex gap-3">
+        <a href="/movie/${imdbID}" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center">
+          Ver Detalle Completo
+        </a>
       </div>
     `;
 
