@@ -63,9 +63,26 @@ export async function fetchMovieTrailer(movieTitle) {
   }
 }
 
+export async function searchMovies(query, type = null) {
+  try {
+    const typeParam = type ? `&type=${type}` : '';
+    const response = await fetch(`${BASE_URL}?s=${encodeURIComponent(query)}${typeParam}&apikey=${API_KEY}`);
+    const data = await response.json();
+
+    if (data.Search && data.Search.length > 0) {
+      return data.Search;
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error searching movies:', error);
+    return [];
+  }
+}
+
 export async function fetchSimilarMovies(genre, currentImdbID, limit = 6) {
   try {
-    const response = await fetch(`${BASE_URL}?s=${genre}&type=movie&apikey=${API_KEY}`);
+    const response = await fetch(`${BASE_URL}?s=${encodeURIComponent(genre)}&type=movie&apikey=${API_KEY}`);
     const data = await response.json();
 
     if (data.Search && data.Search.length > 0) {

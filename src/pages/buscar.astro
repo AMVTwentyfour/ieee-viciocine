@@ -1,0 +1,150 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { searchMovies, fetchMoviesByGenre } from "../lib/api.js";
+
+export const prerender = false; // Enable SSR for dynamic search
+
+const query = Astro.url.searchParams.get('q')?.trim() || '';
+
+let searchResults: any[] = [];
+let similarResults: any[] = [];
+
+if (query) {
+  try {
+    // Search for movies using our API function
+    const allResults = await searchMovies(query);
+    searchResults = allResults.slice(0, 15);
+
+    const genreKeywords = ['action', 'comedy', 'drama', 'horror', 'thriller', 'romance', 'sci-fi', 'fantasy', 'animation', 'documentary'];
+    const queryLower = query.toLowerCase();
+    const matchedGenre = genreKeywords.find(genre => queryLower.includes(genre));
+
+    if (matchedGenre) {
+      const genreData = await fetchMoviesByGenre(matchedGenre);
+      if (genreData.Search) {
+        similarResults = genreData.Search
+          .filter((movie: any) => !searchResults.some(result => result.imdbID === movie.imdbID))
+          .slice(0, 8);
+      }
+    }
+  } catch (error) {
+    console.error('Search error:', error);
+  }
+}
+---
+
+<Layout>
+  <div class="min-h-screen bg-gray-50 py-8 pt-24 md:pt-32 pb-24 md:pb-0">
+    <div class="max-w-6xl mx-auto px-4">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">
+          Resultados para "{query}"
+        </h1>
+        <p class="text-gray-600">
+          {searchResults.length + similarResults.length} resultados encontrados
+        </p>
+      </div>
+
+      <!-- Search Results -->
+      {searchResults.length > 0 && (
+        <div class="mb-12">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-6">Resultados Exactos</h2>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {searchResults.map((movie: any) => (
+              <a
+                href={`/movie/${movie.imdbID}`}
+                class="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+              >
+                <div class="aspect-2/3 overflow-hidden">
+                  <img
+                    src={movie.Poster !== 'N/A' ? movie.Poster : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}
+                    alt={movie.Title}
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="p-4">
+                  <h3 class="font-semibold text-sm text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors mb-2">
+                    {movie.Title}
+                  </h3>
+                  <p class="text-xs text-gray-600">{movie.Year}</p>
+                  {movie.Type && (
+                    <span class="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                      {movie.Type}
+                    </span>
+                  )}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Similar Results -->
+      {similarResults.length > 0 && (
+        <div class="mb-12">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-6">Resultados Similares</h2>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {similarResults.map((movie: any) => (
+              <a
+                href={`/movie/${movie.imdbID}`}
+                class="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+              >
+                <div class="aspect-2/3 overflow-hidden">
+                  <img
+                    src={movie.Poster !== 'N/A' ? movie.Poster : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}
+                    alt={movie.Title}
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="p-4">
+                  <h3 class="font-semibold text-sm text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors mb-2">
+                    {movie.Title}
+                  </h3>
+                  <p class="text-xs text-gray-600">{movie.Year}</p>
+                  {movie.Type && (
+                    <span class="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                      {movie.Type}
+                    </span>
+                  )}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- No Results -->
+      {searchResults.length === 0 && similarResults.length === 0 && query && (
+        <div class="text-center py-12">
+          <div class="material-icons text-6xl text-gray-400 mb-4">search_off</div>
+          <h3 class="text-xl font-semibold text-gray-600 mb-2">No se encontraron resultados</h3>
+          <p class="text-gray-500 mb-6">
+            No encontramos películas que coincidan con "{query}"
+          </p>
+          <div class="space-y-2 text-sm text-gray-600">
+            <p>💡 <strong>Sugerencias:</strong></p>
+            <ul class="text-left inline-block">
+              <li>• Verifica la ortografía</li>
+              <li>• Prueba con palabras clave más generales</li>
+              <li>• Busca por título, actor o director</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      <!-- Back to Home -->
+      <div class="text-center mt-12">
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+        >
+          <span class="material-icons">home</span>
+          Volver al Inicio
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
