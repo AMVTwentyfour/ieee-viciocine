@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+:root {
+  --bg: 249 250 251;
+  --bg-dark: 17 24 39;
+  --text: 0 0 0;
+  --text-dark: 255 255 255;
+  --card-bg: 255 255 255;
+  --card-bg-dark: 31 41 55;
+  --text-secondary: 107 114 128;
+  --text-secondary-dark: 156 163 175;
+}
+
+.dark {
+  --bg: var(--bg-dark);
+  --text: var(--text-dark);
+  --card-bg: var(--card-bg-dark);
+  --text-secondary: var(--text-secondary-dark);
+}
+
 body {
 	font-family: 'Ubuntu', sans-serif;
 	scrollbar-width: none; /* Firefox */

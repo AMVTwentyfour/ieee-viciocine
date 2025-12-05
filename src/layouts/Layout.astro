@@ -12,8 +12,14 @@ import '../styles/global.css';
 		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
 		<title>CineFinder</title>
+		<script>
+			// Theme management
+			const theme = localStorage.getItem('theme');
+			const isDark = theme === 'dark';
+			document.documentElement.classList.toggle('dark', isDark);
+		</script>
 	</head>
-	<body>
+	<body class="bg-[rgb(var(--bg))]">
 		<Navbar />
 		<slot />
 	</body>

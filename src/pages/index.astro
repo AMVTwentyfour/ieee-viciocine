@@ -1,7 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Section from "../components/Section.astro";
-import FilterSection from "../components/FilterSection.astro";
 import Modal from "../components/Modal.astro";
 import {
 	fetchLatestMovies,
@@ -65,17 +64,6 @@ try {
 			</a>
 		</div>
 	</section>
-
-	<FilterSection
-		genres={[
-			"Acción",
-			"Terror",
-			"Comedia",
-			"Drama",
-			"Ciencia Ficción",
-			"Romance",
-		]}
-	/>
 
 	<Section title="Peliculas" movies={latestMovies.Search} delay="0.4s" />
 
